@@ -4,8 +4,8 @@ plugins {
 }
 
 android {
+    namespace 'io.ak1.pixsample'
     compileSdk 34
-namespace 'io.ak1.pixsample'
     defaultConfig {
         applicationId "io.ak1.pixsample"
         minSdkVersion 21

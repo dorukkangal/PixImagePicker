@@ -6,7 +6,6 @@ import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentActivity
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import io.ak1.pix.databinding.FragmentPixBinding
 import io.ak1.pix.utility.PixBindings
 
 /**

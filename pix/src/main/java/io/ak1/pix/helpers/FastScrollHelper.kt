@@ -11,7 +11,6 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import io.ak1.pix.PixFragment
 import io.ak1.pix.R
-import io.ak1.pix.databinding.FragmentPixBinding
 import io.ak1.pix.utility.PixBindings
 import io.ak1.pix.utility.sScrollbarAnimDuration
 import kotlin.math.max

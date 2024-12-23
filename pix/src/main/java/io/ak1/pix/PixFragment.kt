@@ -10,7 +10,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.net.toFile
 import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -35,7 +34,6 @@ import io.ak1.pix.utility.ARG_PARAM_PIX_KEY
 import io.ak1.pix.utility.CustomItemTouchListener
 import io.ak1.pix.utility.PixBindings
 import kotlinx.coroutines.*
-import java.lang.Runnable
 import kotlin.coroutines.cancellation.CancellationException
 
 /**

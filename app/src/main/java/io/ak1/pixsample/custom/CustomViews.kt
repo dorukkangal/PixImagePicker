@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import io.ak1.pix.helpers.toPx
-import io.ak1.pixsample.R
 
 /**
  * Created By Akshay Sharma on 20,June,2021

@@ -4,9 +4,7 @@ import android.annotation.SuppressLint
 import android.net.Uri
 import android.os.Parcelable
 import kotlinx.parcelize.IgnoredOnParcel
-
 import kotlinx.parcelize.Parcelize
-import java.util.*
 
 /**
  * Created By Akshay Sharma on 17,June,2021
@@ -38,19 +36,20 @@ class Options : Parcelable {
     var mode = Mode.All
     var flash = Flash.Auto
     var preSelectedUrls = ArrayList<Uri>()
-    var videoOptions : VideoOptions = VideoOptions()
+    var videoOptions: VideoOptions = VideoOptions()
 }
 
 @Parcelize
 enum class Mode : Parcelable {
     All, Picture, Video
 }
+
 @SuppressLint("ParcelCreator")
 @Parcelize
 class VideoOptions : Parcelable {
-    var videoBitrate : Int? = null
-    var audioBitrate : Int? = null
-    var videoFrameRate : Int? = null
+    var videoBitrate: Int? = null
+    var audioBitrate: Int? = null
+    var videoFrameRate: Int? = null
     var videoDurationLimitInSeconds = 10
 }
 

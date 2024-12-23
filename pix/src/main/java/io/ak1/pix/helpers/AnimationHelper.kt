@@ -1,7 +1,6 @@
 package io.ak1.pix.helpers
 
 import android.view.animation.AccelerateDecelerateInterpolator
-import io.ak1.pix.databinding.FragmentPixBinding
 import io.ak1.pix.utility.PixBindings
 
 /**

@@ -26,8 +26,7 @@ import io.ak1.pix.models.Ratio
 import io.ak1.pix.utility.PixBindings
 import java.io.File
 import java.text.SimpleDateFormat
-import java.util.*
-import kotlin.collections.ArrayList
+import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -196,7 +195,6 @@ class CameraXManager(
     }
 
 
-
     @SuppressLint("RestrictedApi")
     private fun createVideoCaptureUseCase(
         screenAspectRatio: Int, videoBitrate: Int?,
@@ -206,13 +204,14 @@ class CameraXManager(
 
         val qualitySelector = QualitySelector.fromOrderedList(
             listOf(Quality.UHD, Quality.FHD, Quality.HD, Quality.SD),
-            FallbackStrategy.lowerQualityOrHigherThan(Quality.SD))
+            FallbackStrategy.lowerQualityOrHigherThan(Quality.SD)
+        )
 
         val recorder = Recorder.Builder()
             .setExecutor(executor)
             .setQualitySelector(qualitySelector)
             .setAspectRatio(screenAspectRatio).apply {
-            videoBitrate?.let { this.setTargetVideoEncodingBitRate(it) }
+                videoBitrate?.let { this.setTargetVideoEncodingBitRate(it) }
             }
             .build()
 
@@ -251,7 +250,7 @@ class CameraXManager(
                     val msg = "Photo capture succeeded: $savedUri"
                     //Toast.makeText(requireActivity, msg, Toast.LENGTH_SHORT).show()
                     Log.d("TAG", msg)
-                    requireActivity.scanPhoto(photoFile){
+                    requireActivity.scanPhoto(photoFile) {
                         output.savedUri?.let {
                             callback(it, null)
                         }
@@ -264,36 +263,40 @@ class CameraXManager(
     fun takeVideo(callback: (Uri, String?) -> Unit) {
         // Create MediaStoreOutputOptions for our recorder
         val name = "Pix-recording-" +
-            SimpleDateFormat(FILENAME_FORMAT, Locale.US)
+                SimpleDateFormat(FILENAME_FORMAT, Locale.US)
                     .format(System.currentTimeMillis()) + ".mp4"
         val contentValues = ContentValues().apply {
             put(MediaStore.Video.Media.DISPLAY_NAME, name)
         }
-        val mediaStoreOutput = MediaStoreOutputOptions.Builder(requireActivity.contentResolver,
-            MediaStore.Video.Media.EXTERNAL_CONTENT_URI)
+        val mediaStoreOutput = MediaStoreOutputOptions.Builder(
+            requireActivity.contentResolver,
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+        )
             .setContentValues(contentValues)
             .build()
 
-if (videoCapture==null) return
+        if (videoCapture == null) return
         recording = null
-         recording = videoCapture!!.output
+        recording = videoCapture!!.output
             .prepareRecording(requireActivity, mediaStoreOutput)
             .withAudioEnabled()
-            .start(executor
-            ) {vre ->
-            when (vre) {
-                is VideoRecordEvent.Start -> {
-                    Log.d(TAG, "Recording started")
+            .start(
+                executor
+            ) { vre ->
+                when (vre) {
+                    is VideoRecordEvent.Start -> {
+                        Log.d(TAG, "Recording started")
+                    }
+                    is VideoRecordEvent.Pause -> {
+                        Log.d(TAG, "Recording stopped")
+                    }
+                    is VideoRecordEvent.Resume -> {
+                    }
+                    is VideoRecordEvent.Finalize -> {
+                        callback(vre.outputResults.outputUri, null)
+                    }
                 }
-                is VideoRecordEvent.Pause -> {
-                    Log.d(TAG, "Recording stopped")
-                }
-                is VideoRecordEvent.Resume -> {
-                }
-                is VideoRecordEvent.Finalize ->{
-                    callback(vre.outputResults.outputUri, null)
-                }
-            }}
+            }
     }
 
     private fun getOutputDirectory(): File {
