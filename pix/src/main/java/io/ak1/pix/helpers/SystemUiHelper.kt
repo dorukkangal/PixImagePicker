@@ -66,7 +66,7 @@ val Activity.navigationBarHeight: Int
 fun Activity.getScreenSize() {
     WIDTH = DisplayMetrics().apply {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            display?.getRealMetrics(this)
+            windowManager.currentWindowMetrics
         } else {
             @Suppress("DEPRECATION")
             windowManager.defaultDisplay.getMetrics(this)

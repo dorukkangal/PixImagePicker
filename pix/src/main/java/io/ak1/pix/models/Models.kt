@@ -13,10 +13,10 @@ import kotlinx.parcelize.Parcelize
 @SuppressLint("ParcelCreator")
 @Parcelize
 data class Img(
-    var headerDate: String = "",
-    var contentUrl: Uri = Uri.EMPTY,
-    var scrollerDate: String = "",
-    var mediaType: Int = 1
+    val headerDate: String = "",
+    val contentUrl: Uri = Uri.EMPTY,
+    val scrollerDate: String = "",
+    val mediaType: Int = 1
 ) : Parcelable {
     @IgnoredOnParcel
     var selected = false
@@ -27,17 +27,17 @@ data class Img(
 
 @SuppressLint("ParcelCreator")
 @Parcelize
-class Options : Parcelable {
-    var ratio = Ratio.RATIO_AUTO
-    var count = 1
-    var spanCount = 4
-    var path = "Pix/Camera"
-    var isFrontFacing = false
-    var mode = Mode.All
-    var flash = Flash.Auto
-    var preSelectedUrls = ArrayList<Uri>()
+data class Options(
+    var ratio: Ratio = Ratio.RATIO_AUTO,
+    var count: Int = 1,
+    var spanCount: Int = 4,
+    var path: String = "Pix/Camera",
+    var isFrontFacing: Boolean = false,
+    var mode: Mode = Mode.All,
+    var flash: Flash = Flash.Auto,
+    var preSelectedUrls: ArrayList<Uri> = ArrayList(),
     var videoOptions: VideoOptions = VideoOptions()
-}
+) : Parcelable
 
 @Parcelize
 enum class Mode : Parcelable {
@@ -46,12 +46,12 @@ enum class Mode : Parcelable {
 
 @SuppressLint("ParcelCreator")
 @Parcelize
-class VideoOptions : Parcelable {
-    var videoBitrate: Int? = null
-    var audioBitrate: Int? = null
-    var videoFrameRate: Int? = null
-    var videoDurationLimitInSeconds = 10
-}
+data class VideoOptions(
+    var videoBitrate: Int? = null,
+    var audioBitrate: Int? = null,
+    var videoFrameRate: Int? = null,
+    var videoDurationLimitInSeconds: Int = 10
+) : Parcelable
 
 @Parcelize
 enum class Flash : Parcelable {
@@ -63,7 +63,7 @@ enum class Ratio : Parcelable {
     RATIO_4_3, RATIO_16_9, RATIO_AUTO
 }
 
-internal class ModelList(
+internal data class ModelList(
     var list: ArrayList<Img> = ArrayList(),
     var selection: ArrayList<Img> = ArrayList()
 )

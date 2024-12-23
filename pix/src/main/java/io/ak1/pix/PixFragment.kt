@@ -10,7 +10,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
@@ -24,7 +23,44 @@ import io.ak1.pix.databinding.FragmentPixBinding
 import io.ak1.pix.databinding.GridLayoutBinding
 import io.ak1.pix.databinding.PermissionsLayoutBinding
 import io.ak1.pix.databinding.VideoCounterLayoutBinding
-import io.ak1.pix.helpers.*
+import io.ak1.pix.helpers.CameraXManager
+import io.ak1.pix.helpers.LocalResourceManager
+import io.ak1.pix.helpers.PixBus
+import io.ak1.pix.helpers.PixEventCallback
+import io.ak1.pix.helpers.cancelAnimation
+import io.ak1.pix.helpers.color
+import io.ak1.pix.helpers.getScrollProportion
+import io.ak1.pix.helpers.handler
+import io.ak1.pix.helpers.hide
+import io.ak1.pix.helpers.hideBubble
+import io.ak1.pix.helpers.hideScrollbar
+import io.ak1.pix.helpers.hideStatusBar
+import io.ak1.pix.helpers.instantImageAdapter
+import io.ak1.pix.helpers.longSelectionStatus
+import io.ak1.pix.helpers.mBubbleAnimator
+import io.ak1.pix.helpers.mScrollbarAnimator
+import io.ak1.pix.helpers.mViewHeight
+import io.ak1.pix.helpers.mainImageAdapter
+import io.ak1.pix.helpers.permissionsFilter
+import io.ak1.pix.helpers.sScrollbarHideDelay
+import io.ak1.pix.helpers.scrollListener
+import io.ak1.pix.helpers.selection
+import io.ak1.pix.helpers.sendButtonStateAnimation
+import io.ak1.pix.helpers.setDrawableIconForFlash
+import io.ak1.pix.helpers.setRecyclerViewPosition
+import io.ak1.pix.helpers.setSelectionText
+import io.ak1.pix.helpers.setUpMargins
+import io.ak1.pix.helpers.setViewPositions
+import io.ak1.pix.helpers.setup
+import io.ak1.pix.helpers.setupClickControls
+import io.ak1.pix.helpers.setupMainRecyclerView
+import io.ak1.pix.helpers.setupScreen
+import io.ak1.pix.helpers.show
+import io.ak1.pix.helpers.showBubble
+import io.ak1.pix.helpers.showScrollbar
+import io.ak1.pix.helpers.toPx
+import io.ak1.pix.helpers.toast
+import io.ak1.pix.helpers.toolbarHeight
 import io.ak1.pix.interfaces.OnSelectionListener
 import io.ak1.pix.models.Img
 import io.ak1.pix.models.Options
@@ -33,7 +69,14 @@ import io.ak1.pix.utility.ARG_PARAM_PIX
 import io.ak1.pix.utility.ARG_PARAM_PIX_KEY
 import io.ak1.pix.utility.CustomItemTouchListener
 import io.ak1.pix.utility.PixBindings
-import kotlinx.coroutines.*
+import io.ak1.pix.utility.parcelable
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlin.coroutines.cancellation.CancellationException
 
 /**
@@ -92,7 +135,7 @@ class PixFragment(private val resultCallback: ((PixEventCallback.Results) -> Uni
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        options = arguments?.getParcelable(ARG_PARAM_PIX) ?: Options()
+        options = arguments?.parcelable(ARG_PARAM_PIX) ?: Options()
         requireActivity().let {
             it.setupScreen()
             it.actionBar?.hide()
@@ -129,7 +172,7 @@ class PixFragment(private val resultCallback: ((PixEventCallback.Results) -> Uni
         reSetup(this)
         //in case of resetting the options in an live fragment
         setFragmentResultListener(ARG_PARAM_PIX_KEY) { _, bundle ->
-            val options1: Options? = bundle.getParcelable(ARG_PARAM_PIX)
+            val options1: Options? = bundle.parcelable(ARG_PARAM_PIX)
             options1?.let {
                 this@PixFragment.options.preSelectedUrls.apply {
                     clear()
@@ -397,10 +440,7 @@ class PixFragment(private val resultCallback: ((PixEventCallback.Results) -> Uni
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 binding.apply {
-                    if (event.x < gridLayout.fastscrollHandle.x - ViewCompat.getPaddingStart(
-                            gridLayout.fastscrollHandle
-                        )
-                    ) {
+                    if (event.x < gridLayout.fastscrollHandle.x - gridLayout.fastscrollHandle.paddingStart) {
                         return false
                     }
                     gridLayout.fastscrollHandle.isSelected = true

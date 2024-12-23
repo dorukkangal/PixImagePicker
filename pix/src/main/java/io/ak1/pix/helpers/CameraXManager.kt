@@ -3,10 +3,16 @@ package io.ak1.pix.helpers
 import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.net.Uri
+import android.os.Build
 import android.provider.MediaStore
 import android.util.DisplayMetrics
 import android.util.Log
-import androidx.camera.core.*
+import androidx.camera.core.AspectRatio
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageCapture
+import androidx.camera.core.ImageCaptureException
+import androidx.camera.core.Preview
+import androidx.camera.core.UseCase
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.video.FallbackStrategy
 import androidx.camera.video.MediaStoreOutputOptions
@@ -71,7 +77,15 @@ class CameraXManager(
         val display = previewView.display ?: return
 
         // Get screen metrics used to setup camera for full screen resolution
-        val metrics = DisplayMetrics().also { display.getRealMetrics(it) }
+        val metrics = DisplayMetrics().also {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                requireActivity.windowManager.currentWindowMetrics
+            } else {
+                @Suppress("Deprecation")
+                display.getRealMetrics(it)
+            }
+        }
+
         Log.d(TAG, "Screen metrics: ${metrics.widthPixels} x ${metrics.heightPixels}")
 
         val screenAspectRatio = when (options.ratio) {
