@@ -4,10 +4,10 @@ plugins {
 }
 
 android {
-    namespace = "io.ak1.pixsample"
+    namespace = "com.dorukkangal.pixsample"
     compileSdk = 35
     defaultConfig {
-        applicationId = "io.ak1.pixsample"
+        applicationId = "io.dorukkangal.pixsample"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
@@ -45,7 +45,7 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.2.0")
     implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation(project(":pix"))
-    //implementation("io.ak1.pix:piximagepicker:1.6.0")
+    //implementation("com.github.dorukkangal:PixImagePicker:1.7.0")
     implementation("androidx.navigation:navigation-fragment-ktx:2.8.5")
     implementation("androidx.navigation:navigation-ui-ktx:2.8.5")
     implementation("androidx.preference:preference-ktx:1.2.1")

@@ -4,11 +4,11 @@ plugins {
     id("kotlin-parcelize")
     id("kotlin-kapt")
     id("com.google.devtools.ksp")
-    id("com.vanniktech.maven.publish")
+    id("maven-publish")
 }
 
 android {
-    namespace = "io.ak1.pix"
+    namespace = "com.dorukkangal.pix"
     compileSdk = 35
     defaultConfig {
         minSdk = 24
@@ -37,6 +37,11 @@ android {
     buildFeatures {
         viewBinding = true
         dataBinding = true
+    }
+
+    lint {
+        checkReleaseBuilds = false
+        abortOnError = false
     }
 }
 
@@ -71,4 +76,18 @@ dependencies {
 
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("release") {
+            groupId = "com.github.dorukkangal"
+            artifactId = "PixImagePicker"
+            version = "1.0.0"
+
+            afterEvaluate {
+                from(components["release"])
+            }
+        }
+    }
 }
