@@ -20,7 +20,7 @@ import kotlin.coroutines.cancellation.CancellationException
 fun Context.getImageVideoCursor(mode: Mode): Cursor? {
     val projection = when (mode) {
         Mode.Video -> VIDEO_SELECTION
-        Mode.Picture -> IMAGE_SELECTION
+        Mode.Photo -> IMAGE_SELECTION
         else -> IMAGE_VIDEO_SELECTION
     }
     return contentResolver
@@ -43,7 +43,7 @@ internal class LocalResourceManager(
     fun retrieveMedia(
         start: Int = 0,
         limit: Int = 0,
-        mode: Mode = Mode.All
+        mode: Mode = Mode.Photo
     ): ModelList {
         val cursor = context.getImageVideoCursor(mode)
         Log.v(TAG, "$className retrieved images from $start to $limit and size ${cursor?.count}")

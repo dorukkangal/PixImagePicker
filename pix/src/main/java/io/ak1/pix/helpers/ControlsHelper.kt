@@ -22,6 +22,7 @@ import io.ak1.pix.models.Options
 import io.ak1.pix.models.PixViewModel
 import io.ak1.pix.utility.PixBindings
 import io.ak1.pix.utility.TAG
+import io.ak1.pix.utility.setTextColorRes
 
 /**
  * Created By Akshay Sharma on 17,June,2021
@@ -53,9 +54,11 @@ fun ViewGroup.setOnClickForFLash(options: Options, callback: (Options) -> Unit) 
                         Flash.Auto -> {
                             options.flash = Flash.Off
                         }
+
                         Flash.Off -> {
                             options.flash = Flash.On
                         }
+
                         else -> {
                             options.flash = Flash.Auto
                         }
@@ -74,65 +77,110 @@ internal fun PixBindings.setupClickControls(
     model: PixViewModel,
     cameraXManager: CameraXManager?,
     options: Options,
-    callback: (Int, Uri) -> Unit
+    onModeChange: (Mode) -> Unit,
+    callback: (Int, Uri) -> Unit,
 ) {
-    controlsLayout.messageBottom.setText(
+    controlsLayout.selectionPhoto.apply {
         when (options.mode) {
-            Mode.Picture -> R.string.pix_bottom_message_without_video
-            Mode.Video -> R.string.pix_bottom_message_with_only_video
-            else -> R.string.pix_bottom_message_with_video
+            Mode.Photo -> setTextColorRes(R.color.text_color_selected)
+            else -> setTextColorRes(R.color.text_color_unselected)
         }
-    )
+
+        setOnClickListener {
+            if (options.mode != Mode.Photo) {
+                onModeChange(Mode.Photo)
+            }
+        }
+    }
+    controlsLayout.selectionVideo.apply {
+        when (options.mode) {
+            Mode.Video -> setTextColorRes(R.color.text_color_selected)
+            else -> setTextColorRes(R.color.text_color_unselected)
+        }
+
+        setOnClickListener {
+            if (options.mode != Mode.Video) {
+                onModeChange(Mode.Video)
+            }
+        }
+    }
+
     controlsLayout.primaryClickButton.apply {
         var videoCounterProgress: Int
 
         val videoCounterHandler = Handler(Looper.getMainLooper())
         lateinit var videoCounterRunnable: Runnable
 
-        setOnClickListener {
-            if (options.count <= model.selectionListSize) {
-                gridLayout.sendButton.context.toast(model.selectionListSize)
-                return@setOnClickListener
-            }
-            cameraXManager?.takePhoto { uri, exc ->
-                if (exc == null) {
-                    val newUri = Uri.parse(uri.toString())
-                    callback(3, newUri)
-                } else {
-                    Log.e(TAG, "$exc")
-                }
-            }
-            isEnabled = false
-            Handler(Looper.getMainLooper()).postDelayed({
-                isEnabled = true
-            }, 1000L)
-
-        }
         var isRecording = false
-        setOnLongClickListener {
-            if (options.mode == Mode.Picture) {
-                return@setOnLongClickListener false
-            }
+        setOnClickListener {
+            if (options.mode == Mode.Photo) {
+                if (options.count <= model.selectionListSize) {
+                    gridLayout.sendButton.context.toast(model.selectionListSize)
+                    return@setOnClickListener
+                }
+                cameraXManager?.takePhoto { uri, exc ->
+                    if (exc == null) {
+                        val newUri = Uri.parse(uri.toString())
+                        callback(3, newUri)
+                    } else {
+                        Log.e(TAG, "$exc")
+                    }
+                }
+                isEnabled = false
+                Handler(Looper.getMainLooper()).postDelayed({
+                    isEnabled = true
+                }, 1000L)
+            } else if (options.mode == Mode.Video) {
+                if (options.count <= model.selectionListSize) {
+                    gridLayout.sendButton.context.toast(model.selectionListSize)
+                } else {
+                    if (!isRecording) {
+                        callback(4, Uri.EMPTY)
+                        isRecording = true
+                        videoCounterLayout.videoCounterLayout.show()
+                        videoCounterProgress = 0
+                        videoCounterLayout.videoPbr.progress = 0
+                        videoCounterRunnable = object : Runnable {
+                            override fun run() {
+                                ++videoCounterProgress
 
-            if (options.count <= model.selectionListSize) {
-                gridLayout.sendButton.context.toast(model.selectionListSize)
-                return@setOnLongClickListener false
-            }
-            callback(4, Uri.EMPTY)
-            isRecording = true
-            videoCounterLayout.videoCounterLayout.show()
-            videoCounterProgress = 0
-            videoCounterLayout.videoPbr.progress = 0
-            videoCounterRunnable = object : Runnable {
-                override fun run() {
-                    ++videoCounterProgress
-
-                    videoCounterLayout.videoPbr.progress = videoCounterProgress
-                    videoCounterLayout.videoCounter.text =
-                        videoCounterProgress.counterText
+                                videoCounterLayout.videoPbr.progress = videoCounterProgress
+                                videoCounterLayout.videoCounter.text =
+                                    videoCounterProgress.counterText
 
 
-                    if (videoCounterProgress > options.videoOptions.videoDurationLimitInSeconds) {
+                                if (videoCounterProgress > options.videoOptions.videoDurationLimitInSeconds) {
+                                    gridLayout.initialRecyclerviewContainer.apply {
+                                        alpha = 1f
+                                        translationY = 0f
+                                    }
+                                    callback(5, Uri.EMPTY)
+                                    isRecording = false
+                                    videoCounterLayout.videoCounterLayout.hide()
+                                    videoCounterHandler.removeCallbacks(videoCounterRunnable)
+                                    videoRecordingEndAnim()
+                                    cameraXManager?.recording?.stop()
+                                } else {
+                                    videoCounterHandler.postDelayed(this, 1000)
+                                }
+                            }
+                        }
+                        videoCounterHandler.postDelayed(videoCounterRunnable, 1000)
+                        videoRecordingStartAnim()
+                        val maxVideoDuration = options.videoOptions.videoDurationLimitInSeconds
+                        videoCounterLayout.videoPbr.max = maxVideoDuration / 1000
+                        videoCounterLayout.videoPbr.invalidate()
+                        gridLayout.initialRecyclerviewContainer.animate().translationY(500f)
+                            .alpha(0f)
+                            .setDuration(200).start()
+                        cameraXManager?.takeVideo { uri, exc ->
+                            if (exc == null) {
+                                callback(3, uri)
+                            } else {
+                                Log.e(TAG, "$exc")
+                            }
+                        }
+                    } else {
                         gridLayout.initialRecyclerviewContainer.apply {
                             alpha = 1f
                             translationY = 0f
@@ -143,28 +191,11 @@ internal fun PixBindings.setupClickControls(
                         videoCounterHandler.removeCallbacks(videoCounterRunnable)
                         videoRecordingEndAnim()
                         cameraXManager?.recording?.stop()
-                    } else {
-                        videoCounterHandler.postDelayed(this, 1000)
                     }
                 }
             }
-            videoCounterHandler.postDelayed(videoCounterRunnable, 1000)
-            videoRecordingStartAnim()
-            val maxVideoDuration = options.videoOptions.videoDurationLimitInSeconds
-            videoCounterLayout.videoPbr.max = maxVideoDuration / 1000
-            videoCounterLayout.videoPbr.invalidate()
-            gridLayout.initialRecyclerviewContainer.animate().translationY(500f).alpha(0f)
-                .setDuration(200).start()
-            cameraXManager?.takeVideo { uri, exc ->
-                if (exc == null) {
-                    callback(3, uri)
-                } else {
-                    Log.e(TAG, "$exc")
-                }
-
-            }
-            true
         }
+
         setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_UP || event.action == MotionEvent.ACTION_CANCEL) {
                 controlsLayout.primaryClickBackground.hide()
@@ -185,18 +216,6 @@ internal fun PixBindings.setupClickControls(
                     .scaleY(1.2f).setDuration(300)
                     .setInterpolator(AccelerateDecelerateInterpolator()).start()
                 fragmentPix.root.requestDisallowInterceptTouchEvent(true)
-            }
-            if ((event.action == MotionEvent.ACTION_UP || event.action == MotionEvent.ACTION_CANCEL) && isRecording) {
-                gridLayout.initialRecyclerviewContainer.apply {
-                    alpha = 1f
-                    translationY = 0f
-                }
-                callback(5, Uri.EMPTY)
-                isRecording = false
-                videoCounterLayout.videoCounterLayout.hide()
-                videoCounterHandler.removeCallbacks(videoCounterRunnable)
-                videoRecordingEndAnim()
-                cameraXManager?.recording?.stop()
             }
             false
         }

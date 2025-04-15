@@ -308,7 +308,15 @@ class PixFragment(private val resultCallback: ((PixEventCallback.Results) -> Uni
     }
 
     private fun setupControls() {
-        binding.setupClickControls(model, cameraXManager, options) { int, uri ->
+        binding.setupClickControls(
+            model = model,
+            cameraXManager = cameraXManager,
+            options = options,
+            onModeChange = {
+                options.mode = it
+                setupControls()
+            }
+        ) { int, uri ->
             when (int) {
                 0 -> model.returnObjects()
                 1 -> mBottomSheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED

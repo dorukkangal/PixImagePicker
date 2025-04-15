@@ -33,7 +33,7 @@ data class Options(
     var spanCount: Int = 4,
     var path: String = "Pix/Camera",
     var isFrontFacing: Boolean = false,
-    var mode: Mode = Mode.All,
+    var mode: Mode = Mode.Photo,
     var flash: Flash = Flash.Auto,
     var preSelectedUrls: ArrayList<Uri> = ArrayList(),
     var videoOptions: VideoOptions = VideoOptions()
@@ -41,7 +41,8 @@ data class Options(
 
 @Parcelize
 enum class Mode : Parcelable {
-    All, Picture, Video
+    Photo,
+    Video
 }
 
 @SuppressLint("ParcelCreator")

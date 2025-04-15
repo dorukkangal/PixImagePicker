@@ -122,7 +122,7 @@ class CameraXManager(
         useCases.add(preview!!)
         // ImageCapture
         when (options.mode) {
-            Mode.Picture -> {
+            Mode.Photo -> {
                 imageCapture = ImageCapture.Builder().apply {
                     setFlashMode(
                         when (options.flash) {

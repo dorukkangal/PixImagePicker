@@ -22,7 +22,7 @@ fun PixBindings.videoRecordingStartAnim() {
         duration = 300
         interpolator = adInterpolator
     }.start()
-    controlsLayout.messageBottom.animate().apply {
+    controlsLayout.selectionBottom.animate().apply {
         alpha(0f)
         duration = 300
         interpolator = adInterpolator
@@ -47,7 +47,7 @@ fun PixBindings.videoRecordingEndAnim() {
         duration = 300
         interpolator = adInterpolator
     }.start()
-    controlsLayout.messageBottom.animate().apply {
+    controlsLayout.selectionBottom.animate().apply {
         scaleX(1f)
         scaleY(1f)
         duration = 300

@@ -65,12 +65,12 @@ fun ActivityResultLauncher<Array<String>>.permissionsFilter(
     if (fragmentActivity.allPermissionsGranted(options.mode)) {
         callback()
     } else {
-        this.launch(if (options.mode == Mode.Picture) REQUIRED_PERMISSIONS_IMAGES else REQUIRED_PERMISSIONS_VIDEO)
+        this.launch(if (options.mode == Mode.Photo) REQUIRED_PERMISSIONS_IMAGES else REQUIRED_PERMISSIONS_VIDEO)
     }
 }
 
 private fun Activity.allPermissionsGranted(mode: Mode) =
-    (if (mode == Mode.Picture) REQUIRED_PERMISSIONS_IMAGES else REQUIRED_PERMISSIONS_VIDEO).all {
+    (if (mode == Mode.Photo) REQUIRED_PERMISSIONS_IMAGES else REQUIRED_PERMISSIONS_VIDEO).all {
         val check = ContextCompat.checkSelfPermission(
             this, it
         ) == PackageManager.PERMISSION_GRANTED

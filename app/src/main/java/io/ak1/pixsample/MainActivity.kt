@@ -54,9 +54,9 @@ class MainActivity : AppCompatActivity() {
                 else -> Flash.Auto
             }
             mode = when (sp.getString("mode", "0")) {
-                "1" -> Mode.Picture
+                "1" -> Mode.Photo
                 "2" -> Mode.Video
-                else -> Mode.All
+                else -> Mode.Photo
             }
             videoOptions = VideoOptions().apply {
                 videoDurationLimitInSeconds = try {
