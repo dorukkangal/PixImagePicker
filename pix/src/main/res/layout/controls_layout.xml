@@ -13,9 +13,8 @@
             android:layout_height="50dp"
             android:layout_gravity="center|bottom"
             android:layout_marginBottom="40dp"
-            android:background="@drawable/red_circle"
             android:contentDescription="@string/click_button"
-            android:visibility="gone" />
+            android:src="@drawable/red_circle" />
 
         <ImageView
             android:id="@+id/primary_click_button"

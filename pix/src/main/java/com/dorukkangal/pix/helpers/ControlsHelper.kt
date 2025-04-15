@@ -8,11 +8,10 @@ import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.view.MotionEvent
 import android.view.ViewGroup
-import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ImageView
 import androidx.camera.core.ImageCapture
+import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.fragment.app.FragmentActivity
 import com.dorukkangal.pix.R
@@ -104,6 +103,18 @@ internal fun PixBindings.setupClickControls(
         }
     }
 
+    controlsLayout.primaryClickBackground.apply {
+        setColorFilter(
+            ContextCompat.getColor(
+                context,
+                when (options.mode) {
+                    Mode.Photo -> R.color.surface_color_pix
+                    else -> R.color.video_counter_color_pix
+                }
+            )
+        )
+    }
+
     controlsLayout.primaryClickButton.apply {
         var videoCounterProgress: Int
 
@@ -125,6 +136,7 @@ internal fun PixBindings.setupClickControls(
                         Log.e(TAG, "$exc")
                     }
                 }
+                photoTakingAnim()
                 isEnabled = false
                 Handler(Looper.getMainLooper()).postDelayed({
                     isEnabled = true
@@ -193,30 +205,6 @@ internal fun PixBindings.setupClickControls(
                     }
                 }
             }
-        }
-
-        setOnTouchListener { _, event ->
-            if (event.action == MotionEvent.ACTION_UP || event.action == MotionEvent.ACTION_CANCEL) {
-                controlsLayout.primaryClickBackground.hide()
-                controlsLayout.primaryClickBackground.animate().scaleX(1f).scaleY(1f)
-                    .setDuration(300).setInterpolator(
-                        AccelerateDecelerateInterpolator()
-                    ).start()
-                controlsLayout.primaryClickButton.animate().scaleX(1f)
-                    .scaleY(1f).setDuration(300).setInterpolator(
-                        AccelerateDecelerateInterpolator()
-                    ).start()
-                fragmentPix.root.requestDisallowInterceptTouchEvent(false)
-            } else if (event.action == MotionEvent.ACTION_DOWN) {
-                controlsLayout.primaryClickBackground.show()
-                controlsLayout.primaryClickBackground.animate().scaleX(1.2f).scaleY(1.2f)
-                    .setDuration(300).setInterpolator(AccelerateDecelerateInterpolator()).start()
-                controlsLayout.primaryClickButton.animate().scaleX(1.2f)
-                    .scaleY(1.2f).setDuration(300)
-                    .setInterpolator(AccelerateDecelerateInterpolator()).start()
-                fragmentPix.root.requestDisallowInterceptTouchEvent(true)
-            }
-            false
         }
         gridLayout.selectionOk.setOnClickListener { callback(0, Uri.EMPTY) }
         gridLayout.sendButton.setOnClickListener { callback(0, Uri.EMPTY) }
